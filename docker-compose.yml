@@ -1,0 +1,105 @@
+version: '3'
+
+networks:
+    app_network:
+        driver: bridge
+
+services:
+    db:
+        image: postgres
+
+        container_name: coursera-db-app
+
+        restart: always
+
+        ports:
+            - "5432:5432" # Ensure no other service is running on this port
+
+        environment:
+            - POSTGRES_DB=${DB_NAME}
+            - POSTGRES_USER=${DB_USER}
+            - POSTGRES_PASSWORD=${DB_PASSWORD}
+
+        networks:
+            - app_network
+
+    adminer:
+        image: adminer:4.8.1
+
+        container_name: coursera-adminer-app
+
+        restart: always
+
+        ports:
+            - "8080:8080"
+
+        networks:
+            - app_network
+
+    backend:
+        build:
+            context: ./Server
+            dockerfile: Dockerfile
+
+        container_name: coursera-backend-app
+        image: coursera-backend-image
+
+        restart: always
+
+        env_file:
+            - .env
+
+        volumes:
+            - staticfiles:/app/static
+
+        ports:
+            - "8000:8000"
+
+        depends_on:
+            - db
+
+        networks:
+            - app_network
+
+        command: gunicorn server.wsgi:application --bind 0.0.0.0:8000
+        # command: [ "python", "manage.py", "runserver", "0.0.0.0:8000" ]
+
+    frontend:
+        build:
+            context: ./Client
+            dockerfile: Dockerfile
+
+        container_name: coursera-frontend-app
+        image: coursera-frontend-image
+
+        restart: always
+
+        networks:
+            - app_network
+
+        ports:
+            - "3000:3000"
+
+        # volumes:
+        #     - ./Client:/app
+
+        command: [ "node", "server.js" ]
+
+    nginx:
+        build: ./nginx
+
+        ports:
+            - 80:80
+
+        networks:
+            - app_network
+
+        volumes:
+            - staticfiles:/app/static
+
+        depends_on:
+            - backend
+            - frontend
+
+volumes:
+    staticfiles:
