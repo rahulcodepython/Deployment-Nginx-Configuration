@@ -8,7 +8,7 @@ services:
     db:
         image: postgres
 
-        container_name: coursera-db-app
+        container_name: CourseHunt-db-app
 
         restart: always
 
@@ -26,7 +26,7 @@ services:
     adminer:
         image: adminer:4.8.1
 
-        container_name: coursera-adminer-app
+        container_name: CourseHunt-adminer-app
 
         restart: always
 
@@ -41,8 +41,8 @@ services:
             context: ./Server
             dockerfile: Dockerfile
 
-        container_name: coursera-backend-app
-        image: coursera-backend-image
+        container_name: CourseHunt-backend-app
+        image: CourseHunt-backend-image
 
         restart: always
 
@@ -69,8 +69,8 @@ services:
             context: ./Client
             dockerfile: Dockerfile
 
-        container_name: coursera-frontend-app
-        image: coursera-frontend-image
+        container_name: CourseHunt-frontend-app
+        image: CourseHunt-frontend-image
 
         restart: always
 
